@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ML_PREDICTION_SERVICE_URL=http://ml-prediction:5001
+      - MODEL_TRAINING_SERVICE_URL=http://model-training:5002
+      - DATA_SERVICE_URL=http://data-service:5003
+    depends_on:
+      - ml-prediction
+      - model-training
+      - data-service
+    networks:
+      - ml-network
+
+  ml-prediction:
+    build:
+      context: ./backend/ml-prediction-service
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - MODEL_PATH=/models/model.pkl
+    volumes:
+      - model-storage:/models
+    networks:
+      - ml-network
+
+  model-training:
+    build:
+      context: ./backend/model-training-service
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      - MODEL_PATH=/models/model.pkl
+      - DATA_DIR=/data
+    volumes:
+      - model-storage:/models
+      - data-storage:/data
+    networks:
+      - ml-network
+
+  data-service:
+    build:
+      context: ./backend/data-service
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5003"
+    environment:
+      - DATA_DIR=/data
+    volumes:
+      - data-storage:/data
+    networks:
+      - ml-network
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - api-gateway
+    networks:
+      - ml-network
+
+volumes:
+  model-storage:
+  data-storage:
+
+networks:
+  ml-network:
+    driver: bridge
