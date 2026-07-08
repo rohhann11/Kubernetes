@@ -11,6 +11,18 @@ ML_PREDICTION_SERVICE = os.getenv('ML_PREDICTION_SERVICE_URL', 'http://localhost
 MODEL_TRAINING_SERVICE = os.getenv('MODEL_TRAINING_SERVICE_URL', 'http://localhost:5002')
 DATA_SERVICE = os.getenv('DATA_SERVICE_URL', 'http://localhost:5003')
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        'message': 'ML Microservices API Gateway',
+        'endpoints': {
+            'health': '/health',
+            'predict': '/api/predict (POST)',
+            'train': '/api/train (POST)',
+            'data': '/api/data (GET/POST)'
+        }
+    }), 200
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'healthy', 'service': 'api-gateway'}), 200
