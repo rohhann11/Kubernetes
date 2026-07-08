@@ -1,0 +1,104 @@
+# Default values for ml-app
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+image:
+  repository: ml-app
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+# API Gateway Configuration
+apiGateway:
+  name: api-gateway
+  port: 5000
+  serviceType: LoadBalancer
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# ML Prediction Service Configuration
+mlPrediction:
+  name: ml-prediction
+  port: 5001
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+# Model Training Service Configuration
+modelTraining:
+  name: model-training
+  port: 5002
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+
+# Data Service Configuration
+dataService:
+  name: data-service
+  port: 5003
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Frontend Configuration
+frontend:
+  name: frontend
+  port: 80
+  containerPort: 3000
+  serviceType: LoadBalancer
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

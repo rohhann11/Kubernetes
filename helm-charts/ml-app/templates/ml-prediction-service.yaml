@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ml-app.fullname" . }}-{{ .Values.mlPrediction.name }}
+  labels:
+    {{- include "ml-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Values.mlPrediction.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.mlPrediction.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-app.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Values.mlPrediction.name }}
