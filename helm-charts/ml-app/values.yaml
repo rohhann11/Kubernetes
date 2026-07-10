@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  repository: ohhann/kubernetes-api-gateway
+  repository: rohhann/kubernetes
   pullPolicy: IfNotPresent
   tag: latest
 
