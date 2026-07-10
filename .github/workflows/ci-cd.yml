@@ -160,12 +160,11 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
           REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_PREFIX="${{ vars.DOCKER_HUB_USERNAME }}/${REPO_NAME}"
           
-          # Update values.yaml with new image tags
+          # Update values.yaml with new image tags and repository prefix
+          sed -i "s|repository: .*|repository: ${IMAGE_PREFIX}|" helm-charts/ml-app/values.yaml
           sed -i "s/tag:.*/tag: ${VERSION}/" helm-charts/ml-app/values.yaml
-          
-          # Update image names if needed
-          sed -i "s|repository: .*|repository: \${{ vars.DOCKER_HUB_USERNAME }}/${REPO_NAME}-api-gateway|" helm-charts/ml-app/values.yaml
 
       - name: Commit and push changes
         run: |
