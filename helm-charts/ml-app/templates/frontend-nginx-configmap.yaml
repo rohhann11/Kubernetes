@@ -23,6 +23,33 @@ data:
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
+        # Generic proxy for hardcoded IP:port patterns (e.g., /172.16.3.104:500X/*)
+        # This handles requests from frontend with hardcoded external URLs
+        location ~ ^/\d+\.\d+\.\d+\.\d+:(\d+)/(.*)$ {
+            set $backend_port $1;
+            set $backend_path $2;
+            
+            # Route based on port number to internal Kubernetes services
+            if ($backend_port = 5000) {
+                set $backend_service "http://{{ include "ml-app.fullname" . }}-{{ .Values.apiGateway.name }}:{{ .Values.apiGateway.port }}";
+            }
+            if ($backend_port = 5001) {
+                set $backend_service "http://{{ include "ml-app.fullname" . }}-{{ .Values.mlPrediction.name }}:{{ .Values.mlPrediction.port }}";
+            }
+            if ($backend_port = 5002) {
+                set $backend_service "http://{{ include "ml-app.fullname" . }}-{{ .Values.modelTraining.name }}:{{ .Values.modelTraining.port }}";
+            }
+            if ($backend_port = 5003) {
+                set $backend_service "http://{{ include "ml-app.fullname" . }}-{{ .Values.dataService.name }}:{{ .Values.dataService.port }}";
+            }
+            
+            proxy_pass $backend_service/$backend_path;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
         # Proxy health check endpoints for each service
         location /api-gateway-health {
             proxy_pass http://{{ include "ml-app.fullname" . }}-{{ .Values.apiGateway.name }}:{{ .Values.apiGateway.port }}/health;
@@ -47,6 +74,15 @@ data:
         # Proxy model training add-training-data endpoint
         location /training/ {
             proxy_pass http://{{ include "ml-app.fullname" . }}-{{ .Values.modelTraining.name }}:{{ .Values.modelTraining.port }}/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Proxy ML prediction endpoint
+        location /predict {
+            proxy_pass http://{{ include "ml-app.fullname" . }}-{{ .Values.mlPrediction.name }}:{{ .Values.mlPrediction.port }}/predict;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
