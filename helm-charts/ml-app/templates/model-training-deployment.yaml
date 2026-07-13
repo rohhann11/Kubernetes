@@ -30,7 +30,7 @@ spec:
         - name: {{ .Values.modelTraining.name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}/{{ .Values.modelTraining.name }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.modelTraining.image.repository }}:{{ .Values.modelTraining.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

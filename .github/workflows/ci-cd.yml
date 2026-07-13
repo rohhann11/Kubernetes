@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME_PREFIX: ${{ vars.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}
+  IMAGE_NAME_PREFIX: ${{ vars.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}-ml-app
 
 jobs:
   build-and-push:
@@ -60,7 +60,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.service.name }}
+          images: ${{ env.REGISTRY }}/${{ matrix.service.name == 'ml-prediction-service' && format('{0}-ml-prediction', env.IMAGE_NAME_PREFIX) || format('{0}-{1}', env.IMAGE_NAME_PREFIX, matrix.service.name) }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -160,11 +160,15 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
           REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_PREFIX="${{ vars.DOCKER_HUB_USERNAME }}/${REPO_NAME}"
+          IMAGE_PREFIX="${{ vars.DOCKER_HUB_USERNAME }}/${REPO_NAME}-ml-app"
           
-          # Update values.yaml with new image tags and repository prefix
-          sed -i "s|repository: .*|repository: ${IMAGE_PREFIX}|" helm-charts/ml-app/values.yaml
-          sed -i "s/tag:.*/tag: ${VERSION}/" helm-charts/ml-app/values.yaml
+          # Update values.yaml with new image tags and repository prefix for each service
+          sed -i "s|repository: rohhann11/kubernetes-ml-app-api-gateway|repository: ${IMAGE_PREFIX}-api-gateway|" helm-charts/ml-app/values.yaml
+          sed -i "s|repository: rohhann11/kubernetes-ml-app-ml-prediction-service|repository: ${IMAGE_PREFIX}-ml-prediction|" helm-charts/ml-app/values.yaml
+          sed -i "s|repository: rohhann11/kubernetes-ml-app-model-training-service|repository: ${IMAGE_PREFIX}-model-training-service|" helm-charts/ml-app/values.yaml
+          sed -i "s|repository: rohhann11/kubernetes-ml-app-data-service|repository: ${IMAGE_PREFIX}-data-service|" helm-charts/ml-app/values.yaml
+          sed -i "s|repository: rohhann11/kubernetes-ml-app-frontend|repository: ${IMAGE_PREFIX}-frontend|" helm-charts/ml-app/values.yaml
+          sed -i "s/tag: latest/tag: ${VERSION}/" helm-charts/ml-app/values.yaml
 
       - name: Commit and push changes
         run: |
