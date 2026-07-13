@@ -3,12 +3,14 @@
 
 replicaCount: 1
 
+# Global image configuration - each service can override
 image:
-  repository: rohhann/kubernetes
   pullPolicy: IfNotPresent
   tag: latest
 
+# Image pull secrets for private registries
 imagePullSecrets: []
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -28,63 +30,78 @@ apiGateway:
   name: api-gateway
   port: 5000
   serviceType: LoadBalancer
+  image:
+    repository: rohhann11/kubernetes-ml-app-api-gateway
+    tag: latest
   resources:
     limits:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
 
 # ML Prediction Service Configuration
 mlPrediction:
   name: ml-prediction
   port: 5001
+  image:
+    repository: rohhann11/kubernetes-ml-app-ml-prediction-service
+    tag: latest
   resources:
     limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
       cpu: 500m
       memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 # Model Training Service Configuration
 modelTraining:
   name: model-training
   port: 5002
+  image:
+    repository: rohhann11/kubernetes-ml-app-model-training-service
+    tag: latest
   resources:
     limits:
-      cpu: 2000m
-      memory: 2Gi
+      cpu: 500m
+      memory: 512Mi
     requests:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 100m
+      memory: 128Mi
 
 # Data Service Configuration
 dataService:
   name: data-service
   port: 5003
+  image:
+    repository: rohhann11/kubernetes-ml-app-data-service
+    tag: latest
   resources:
     limits:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
 
 # Frontend Configuration
 frontend:
   name: frontend
   port: 80
-  containerPort: 3000
+  containerPort: 80
   serviceType: LoadBalancer
+  image:
+    repository: rohhann11/kubernetes-ml-app-frontend
+    tag: latest
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
       cpu: 250m
       memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 ingress:
   enabled: false
