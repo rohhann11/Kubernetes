@@ -272,10 +272,9 @@
     </div>
 
     <script>
-        // Use window.location.hostname to work both locally and in Docker
-        // When accessed via localhost, use localhost; when via IP, use the same IP
-        const API_HOST = window.location.hostname === '0.0.0.0' ? 'localhost' : window.location.hostname;
-        const API_BASE = `http://${API_HOST}:5000/api`;
+        // Use relative paths for internal Kubernetes service communication
+        // The nginx reverse proxy will route requests to the appropriate services
+        const API_BASE = '/api';
 
         function log(message, type = 'info') {
             const logDiv = document.getElementById('activityLog');
@@ -307,10 +306,10 @@
 
         async function checkAllServices() {
             log('Checking all services...');
-            await checkService('API Gateway', `${API_HOST}:5000/health`, 'gatewayStatus');
-            await checkService('ML Prediction', `${API_HOST}:5001/health`, 'predictionStatus');
-            await checkService('Model Training', `${API_HOST}:5002/health`, 'trainingStatus');
-            await checkService('Data Service', `${API_HOST}:5003/health`, 'dataStatus');
+            await checkService('API Gateway', '/api-gateway-health', 'gatewayStatus');
+            await checkService('ML Prediction', '/ml-prediction-health', 'predictionStatus');
+            await checkService('Model Training', '/model-training-health', 'trainingStatus');
+            await checkService('Data Service', '/data-service-health', 'dataStatus');
         }
 
         async function makePrediction() {
@@ -388,7 +387,7 @@
 
             try {
                 log('Adding training data...');
-                const response = await fetch(`http://${API_HOST}:5002/add-training-data`, {
+                const response = await fetch(`/training/add-training-data`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ features, label })
