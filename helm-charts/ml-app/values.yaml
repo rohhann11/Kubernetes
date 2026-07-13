@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  repository: rohhann/kubernetes
+  repository: nginx  # Using nginx as a placeholder - replace with your actual image repository
   pullPolicy: IfNotPresent
   tag: latest
 
